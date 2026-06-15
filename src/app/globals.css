@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+@theme {
+  --color-primary: #0E0E0E;
+  --color-accent: #9B5DE5;
+  --color-secondary: #1F1F1F;
+  --color-text: #F1F1F1;
+  --font-primary: "Bebas Neue", sans-serif;
+  --font-secondary: "Urbanist", sans-serif;
+  --font-display: "DM Sans", sans-serif;
+}
