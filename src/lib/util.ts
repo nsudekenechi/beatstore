@@ -6,10 +6,7 @@ export const signJWT = (payload: object) => {
 
 export const getToken = () => {
   const token = sessionStorage.getItem("admin_token");
-  console.log("Raw token:", token);
-  console.log("First 20 chars:", token?.slice(0, 20));
-  console.log("Length:", token?.length);
-  console.log("Starts with e:", token?.startsWith('e'));
+
   
   if (!token) {
     console.error("No admin_token in sessionStorage");

@@ -73,10 +73,9 @@ export const DELETE = async (request: Request) => {
 
     try {
         const { searchParams } = new URL(request.url);
-        const body = await request.json();
 
         const id = searchParams.get('id');
-        if (!id || !body.name) return NextResponse.json({ status: false, message: "Enter required inputs!" }, { status: 400 })
+        if (!id) return NextResponse.json({ status: false, message: "Enter required inputs!" }, { status: 400 })
 
         await Tag.findByIdAndDelete(
             id

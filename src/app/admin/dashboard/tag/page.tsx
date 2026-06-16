@@ -5,9 +5,11 @@ import { TbEdit } from "react-icons/tb";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { RiApps2AddLine } from "react-icons/ri";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { getToken } from "@/lib/util";
+import TableSkeletonRow from "@/components/TableSkeletonRow";
+import Skeleton from "@/components/Skeleton";
 // import { useTag } from "../../../hooks/useAdmin";
 // import LoadingSpinner from "../../../components/LoadingSpinner";
 interface ITag {
@@ -19,7 +21,10 @@ export default function Tag() {
   const [data, setData] = useState<ITag[]>([]);
   const [selectedTag, setSelectedTag] = useState<ITag | null>(null);
   const [selectedDeleteTag, setSelectedDeleteTag] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    get: false,
+    post: false
+  });
   //   const { isLoading, createTag, getTags, updateTag, deleteTag } = useTag();
   const [inputs, setInputs] = useState({
     name: {
@@ -42,7 +47,7 @@ export default function Tag() {
 
   const handleCreateTag = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoading(prev => ({ ...prev, post: true }));
     try {
       const req = await axios.post("/api/admin/tag", { name: inputs.name.value });
       toast("Tag Created Successfully");
@@ -51,46 +56,55 @@ export default function Tag() {
     } catch (err: any) {
       toast(err.response?.data?.message || "An error occurred", { dismissible: true, position: 'top-right' }); console.error(err);
     } finally {
-      setIsLoading(false);
+      setIsLoading(prev => ({ ...prev, post: false }));
     }
 
   };
   const handleGetTags = async () => {
+    setIsLoading(prev => ({ ...prev, get: true }))
     try {
-
       const req = await axios.get("/api/admin/tag", getToken());
       setData(req.data.message);
-    } catch (err) {
-      console.log(err);
+
+    } catch (err: any) {
+      toast.error("Couldn't Get Tags, something went wrong", err.response.data?.message);
+      console.error(err);
+    } finally {
+      setIsLoading(prev => ({ ...prev, get: false }))
+
+
     }
-    // getTags().then((data) => {
-    //   if (data) {
-    //     setData(data);
-    //   }
-    // });
+
   };
 
-  const handleEditTag = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEditTag = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    try {
+      const req = await axios.patch(`/api/admin/tag?id=${selectedTag?._id}`, { name: inputs.name.value }, getToken());
+      setData(prev => (prev.map(item => ({ ...item, name: selectedTag?._id === item._id ? inputs.name.value : item.name }))))
+      setShowModal(false);
+      setSelectedTag(null);
+      setInputs((prev) => ({ ...prev, name: { ...prev.name, value: "" } }));
+    } catch (err: any) {
+      toast.error("Couldn't Update Tag", err.response.data?.message)
+      console.error(err.response);
+    }
 
 
-    // updateTag({ name: inputs.name.value }, selectedTag._id).then((data) => {
-    //   if (data) {
-    //     setTimeout(() => {
-    //       handleGetTags();
-    //       setShowModal(false);
-    //       setSelectedTag(null);
-    //       setInputs((prev) => ({ ...prev, name: { ...prev.name, value: "" } }));
-    //     }, 1000);
-    //   }
-    // });
   };
 
-  const handleDeleteTag = (id: string) => {
-    // setTimeout(() => {
-    //   setData((prev) => prev.filter((item) => item._id != id));
-    // }, 400);
-    // deleteTag(id);
+  const handleDeleteTag = async (id: string) => {
+    try {
+      await axios.delete(`/api/admin/tag?id=${id}`, getToken());
+      setSelectedDeleteTag(id);
+      setTimeout(() => {
+        setData((prev) => prev.filter((item) => item._id != id));
+      }, 400)
+    } catch (err: any) {
+      toast.error("Couldn't Delete Tag, ", err.response.data?.message)
+      console.error(err.response);
+    }
+
   };
   useEffect(() => {
     handleGetTags();
@@ -107,6 +121,7 @@ export default function Tag() {
           Add New Tag
         </span>
       </div>
+
       <table className="w-full border-t border-black/20 overflow-hidden">
         <thead className="bg-[#f1f1f1] h-12.5 font-secondary ">
           <tr className="text-sm">
@@ -123,60 +138,62 @@ export default function Tag() {
         </thead>
 
         <tbody className="overflow-hidden">
-          {data.length > 0 ? (
-            data.map((item, index) => (
-              <tr
-                key={index}
-                className={`h-15 border-b border-black/20 text-sm font-display capitalize  ${selectedDeleteTag == item._id
-                  ? "translate-x-full opacity-0 duration-500"
-                  : "translate-x-0"
-                  }`}
-              >
-                <td>
-                  <span className="pl-10">
-                    <input type="checkbox" className="accent-accent" />
-                  </span>
-                </td>
+          {
+            isLoading.get ? Array.from({ length: 10 }).map((_, key) => <TableSkeletonRow key={key} />) : data.length > 0 ? (
+              data.map((item, index) => (
+                <tr
+                  key={index}
+                  className={`h-15 border-b border-black/20 text-sm font-display capitalize  ${selectedDeleteTag == item._id
+                    ? "translate-x-full opacity-0 duration-500"
+                    : "translate-x-0"
+                    }`}
+                >
+                  <td>
+                    <span className="pl-10">
+                      <input type="checkbox" className="accent-accent" />
+                    </span>
+                  </td>
 
-                <td>
-                  <span>{item.name}</span>
-                </td>
+                  <td>
+                    <span>{item.name}</span>
+                  </td>
 
-                <td className="text-[#555]">
-                  <div className="flex gap-3 items-center">
-                    <TbEdit
-                      className="cursor-pointer"
-                      size={18}
-                      onClick={() => {
-                        setSelectedTag(item);
-                        setShowModal(true);
-                        setInputs((prev) => ({
-                          ...prev,
-                          name: { ...prev.name, value: item.name },
-                        }));
-                      }}
-                    />
-                    <RiDeleteBinLine
-                      className="cursor-pointer"
-                      size={18}
-                      onClick={() => {
-                        handleDeleteTag(item._id);
-                        setSelectedDeleteTag(item._id);
-                      }}
-                    />
-                  </div>
+                  <td className="text-[#555]">
+                    <div className="flex gap-3 items-center">
+                      <TbEdit
+                        className="cursor-pointer"
+                        size={18}
+                        onClick={() => {
+                          setSelectedTag(item);
+                          setShowModal(true);
+                          setInputs((prev) => ({
+                            ...prev,
+                            name: { ...prev.name, value: item.name },
+                          }));
+                        }}
+                      />
+                      <RiDeleteBinLine
+                        className="cursor-pointer"
+                        size={18}
+                        onClick={() => {
+                          handleDeleteTag(item._id);
+                          // setSelectedDeleteTag(item._id);
+                        }}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3}>
+                  <p className="py-5 border-b text-center">
+                    No items on this list{" "}
+                  </p>
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3}>
-                <p className="py-5 border-b text-center">
-                  No items on this list{" "}
-                </p>
-              </td>
-            </tr>
-          )}
+            )}
+
         </tbody>
       </table>
 
