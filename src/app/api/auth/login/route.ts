@@ -8,6 +8,8 @@ export interface ResponseData {
     message: any;
 }
 export async function POST(request: Request): Promise<NextResponse<ResponseData>> {
+    console.log('JWT_SECRET in login:', process.env.JWT_SECRET);
+
     await connectDB();
 
     const body = await request.json();

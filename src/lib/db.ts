@@ -13,7 +13,6 @@ let isConnected = false;
 
 const connectDB = async () => {
   mongoose.set("strictQuery", true); // Best practice for Mongoose 7/8
-  console.log("Say hi");
   if (isConnected) return;
 
 
@@ -26,7 +25,6 @@ const connectDB = async () => {
     });
 
     isConnected = !!db?.connections[0]?.readyState;
-    console.log("MongoDB Connected Successfully ✅");
 
     // CREATE ADMIN IF NOT EXISTS
     const adminExists = await User.findOne({ email: process.env.ADMIN_EMAIL });

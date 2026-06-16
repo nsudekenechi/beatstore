@@ -7,6 +7,7 @@ import { RiApps2AddLine } from "react-icons/ri";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import axios from "axios";
 import { toast } from "sonner";
+import { getToken } from "@/lib/util";
 // import { useTag } from "../../../hooks/useAdmin";
 // import LoadingSpinner from "../../../components/LoadingSpinner";
 interface ITag {
@@ -54,10 +55,14 @@ export default function Tag() {
     }
 
   };
-
   const handleGetTags = async () => {
-    const req = await axios.get("/api/admin/tag");
-    setData(req.data.message);
+    try {
+
+      const req = await axios.get("/api/admin/tag", getToken());
+      setData(req.data.message);
+    } catch (err) {
+      console.log(err);
+    }
     // getTags().then((data) => {
     //   if (data) {
     //     setData(data);
@@ -67,6 +72,8 @@ export default function Tag() {
 
   const handleEditTag = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+
     // updateTag({ name: inputs.name.value }, selectedTag._id).then((data) => {
     //   if (data) {
     //     setTimeout(() => {
