@@ -1,5 +1,19 @@
 import { IBeats, IGenres, ILicense, ITag } from "@/lib/types";
 import mongoose from "mongoose";
+const cloudinaryFileSchema = new mongoose.Schema(
+    {
+        publicId: {
+            type: String,
+            required: true,
+        },
+        resourceType: {
+            type: String,
+            required: true,
+        },
+    },
+    { _id: false }
+);
+
 const tagSchema = new mongoose.Schema<ITag>({
     name: { type: String, required: true, unique: true },
 });
@@ -41,20 +55,41 @@ const beatSchema = new mongoose.Schema<IBeats>({
         ],
         default: "C"
     },
-    genre: { type: [String], required: true },
-    tags: { type: [String], required: true },
+    genre: { type: [mongoose.Schema.Types.ObjectId], ref: "Genres", required: true },
+    tags: { type: [mongoose.Schema.Types.ObjectId], ref: "Tag", required: true },
     plays: { type: Number, default: 0 },
     likes: { type: Number, default: 0 },
     files: {
-        image: { type: String, required: true },
-        mp3: { type: String, required: true },
-        wav: { type: String },
-        trackout: { type: String }
+        image: {
+            type: cloudinaryFileSchema,
+            required: true
+        },
+        mp3: {
+            type: cloudinaryFileSchema,
+            required: true
+        },
+        wav: {
+            type: cloudinaryFileSchema,
+            required: true
+        },
+        trackout: {
+            type: cloudinaryFileSchema,
+            required: true
+        }
     },
+
+
     isAvailable: { type: Boolean, default: true }
 }, { timestamps: true });
 
-export const Tag = mongoose.models.Tag || mongoose.model("Tag", tagSchema);
-export const Genres = mongoose.models.Genres || mongoose.model("Genres", genresSchema);
-export const License = mongoose.models.License || mongoose.model("License", licenseSchema);
-export const Beat = mongoose.models.Beat || mongoose.model("Beat", beatSchema);
+export const Tag =
+    mongoose.models.Tag || mongoose.model<ITag>("Tag", tagSchema);
+
+export const Genres =
+    mongoose.models.Genres || mongoose.model<IGenres>("Genres", genresSchema);
+
+export const License =
+    mongoose.models.License || mongoose.model<ILicense>("License", licenseSchema);
+
+export const Beat =
+    mongoose.models.Beat || mongoose.model<IBeats>("Beat", beatSchema);

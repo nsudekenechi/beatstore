@@ -18,8 +18,7 @@ const connectDB = async () => {
 
   try {
     const db = await mongoose.connect(MONGODB_URI, {
-      appName: "ajempirebackend",
-      bufferCommands: false, // Don't wait for DB if it's disconnected
+      appName: "alabahmusic",
       maxPoolSize: 10, // Adjust based on Railway plan
       serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
     });

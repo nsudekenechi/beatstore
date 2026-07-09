@@ -5,13 +5,17 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { RiApps2AddLine } from "react-icons/ri";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { ILicense } from "@/lib/types";
+import { toast } from "sonner";
+import axios from "axios";
+import { getToken } from "@/lib/util";
 
 export default function License() {
     const [showModal, setShowModal] = useState(false);
-    const [data, setData] = useState<(ILicense & { _id: string; description: string })[]>([]);
+    const [data, setData] = useState<(ILicense & { _id: string; })[]>([]);
     const [selectedLicense, setSelectedLicense] = useState<(ILicense & { _id: string }) | null>(null);
     const [selectedDeleteLicense, setSelectedDeleteLicense] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<{ get: boolean; post: boolean; }>({ get: false, post: false })
+    let headerToken = getToken()
     const [inputs, setInputs] = useState<
         {
             name: {
@@ -97,9 +101,9 @@ export default function License() {
         resetInputs();
     };
 
-    const handlecreateLicense = (e: FormEvent) => {
+    const handlecreateLicense = async (e: FormEvent) => {
         e.preventDefault();
-
+        setIsLoading(prev => ({ ...prev, post: true }))
         let data: Record<string, any> = {};
         Object.entries(inputs).forEach((item) => {
             if (item[0] != "format") {
@@ -111,17 +115,32 @@ export default function License() {
             }
         });
 
-        // createLicense(data).then((data) => {
-        //   if (data) {
-        //     setTimeout(() => {
-        //       handlegetLicenses();
-        //       handleHideModal();
-        //     }, 1000);
-        //   }
-        // });
+        try {
+            let req = await axios.post("/api/admin/license", data, headerToken);
+            setData(prev => [...prev, req.data.message]);
+            handleHideModal();
+        } catch (err: any) {
+            toast.error(err.response.data.message);
+        } finally {
+            setIsLoading(prev => ({ ...prev, post: false }))
+
+        }
+
+
     };
 
     const handlegetLicenses = async () => {
+        setIsLoading(prev => ({ ...prev, get: true }))
+
+        try {
+            let req = await axios.get("/api/admin/license", headerToken);
+            setData(req.data.message);
+        } catch (err: any) {
+            toast.error(err.response.data.message);
+        } finally {
+            setIsLoading(prev => ({ ...prev, get: false }))
+
+        }
 
     };
 
@@ -298,7 +317,7 @@ export default function License() {
                                                     name: { ...prev.name, value: item.name },
                                                     description: {
                                                         ...prev.description,
-                                                        value: item.description,
+                                                        value: item.description!,
                                                     },
                                                     audioStreams: {
                                                         ...prev.audioStreams,
@@ -509,7 +528,7 @@ export default function License() {
                                                 price: { ...prev.price, isFocused: false },
                                             }))
                                         }
-                                        value={inputs.price.value}
+                                        value={inputs.price.value === 0 ? "" : inputs.price.value}
                                     />
                                 </div>
                             </div>
@@ -551,7 +570,7 @@ export default function License() {
                                                 },
                                             }))
                                         }
-                                        value={inputs.termsOfYears.value}
+                                        value={inputs.termsOfYears.value === 0 ? "" : inputs.termsOfYears.value}
                                     />
                                 </div>
                             </div>
@@ -649,8 +668,8 @@ export default function License() {
                             </div>
                         </div>
                         <button className="bg-accent w-50  px-10 h-10 flex items-center justify-center text-sm text-white font-secondary rounded-full">
-                            {isLoading ? (
-                                <LoadingSpinner />
+                            {isLoading.post ? (
+                                <LoadingSpinner color="white" />
                             ) : selectedLicense ? (
                                 "Edit"
                             ) : (
