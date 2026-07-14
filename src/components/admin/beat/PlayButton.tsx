@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { IoPlay, IoPause } from "react-icons/io5";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/admin//LoadingSpinner";
 
 interface PlayButtonProps {
     isPlaying: boolean;

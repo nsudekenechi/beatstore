@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { RiDeleteBinLine } from "react-icons/ri";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/admin//LoadingSpinner";
 
 interface DeleteModalProps {
     isOpen: boolean;

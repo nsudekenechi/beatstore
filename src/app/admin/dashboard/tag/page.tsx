@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 import { TbEdit } from "react-icons/tb";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { RiApps2AddLine } from "react-icons/ri";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/admin//LoadingSpinner";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { getToken } from "@/lib/util";
-import TableSkeletonRow from "@/components/TableSkeletonRow";
-import Skeleton from "@/components/Skeleton";
+import TableSkeletonRow from "@/components/admin//TableSkeletonRow";
+import Skeleton from "@/components/admin//Skeleton";
 // import { useTag } from "../../../hooks/useAdmin";
 // import LoadingSpinner from "../../../components/LoadingSpinner";
 interface ITag {

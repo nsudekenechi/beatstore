@@ -3,7 +3,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { TbEdit } from "react-icons/tb";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { RiApps2AddLine } from "react-icons/ri";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/admin//LoadingSpinner";
 import { ILicense } from "@/lib/types";
 import { toast } from "sonner";
 import axios from "axios";

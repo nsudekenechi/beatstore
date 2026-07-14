@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo } from "react";
 import { TbEdit } from "react-icons/tb";
 import { RiDeleteBinLine, RiMusic2Line, RiSearchLine } from "react-icons/ri";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/admin//LoadingSpinner";
 import PlayButton from "./PlayButton";
 import TrackProgress from "./TrackProgress";
 import { AudioPlayer } from "./useAudioPlayer";

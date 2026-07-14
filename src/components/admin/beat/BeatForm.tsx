@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { RiApps2AddLine } from "react-icons/ri";
 import { IoChevronDown } from "react-icons/io5";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/admin//LoadingSpinner";
 import MultiSelect from "./MultiSelect";
 import UploadBox from "./UploadBox";
 import AvailabilitySelect from "./AvailabilitySelect";

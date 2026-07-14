@@ -5,7 +5,7 @@ import { HiOutlineEye } from "react-icons/hi2";
 import { HiOutlineEyeSlash } from "react-icons/hi2";
 import { useState } from "react";
 
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/admin//LoadingSpinner";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
