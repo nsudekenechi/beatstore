@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useMemo } from "react";
 import { TbEdit } from "react-icons/tb";
-import { RiDeleteBinLine, RiMusic2Line } from "react-icons/ri";
+import { RiDeleteBinLine, RiMusic2Line, RiSearchLine } from "react-icons/ri";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PlayButton from "./PlayButton";
 import TrackProgress from "./TrackProgress";
@@ -15,6 +15,7 @@ interface BeatTableProps {
     isLoading: boolean;
     deletingId: string | null; // row currently animating out
     togglingId: string | null; // row whose availability is being updated
+    searchQuery: string; // filters rows by name / genre / tag / bpm / key
     player: AudioPlayer;
     onEdit: (beat: IBeatRow) => void;
     onDeleteRequest: (beat: IBeatRow) => void;
@@ -107,7 +108,8 @@ const BeatRow = React.memo(function BeatRow({ beat, genreNames, tagNames, isDele
 
             <td>
                 <span className="block truncate max-w-40 lg:max-w-56" title={beat.name}>{beat.name}</span>
-                {isActive && <TrackProgress getAudio={getAudio} className="mt-1 max-w-40 pr-2" />}
+                {/* {isActive && <TrackProgress getAudio={getAudio} className="mt-1 max-w-40 pr-2" />
+                } */}
             </td>
             <td className="hidden md:table-cell"><span>{beat.bpm}</span></td>
             <td className="hidden md:table-cell"><span>{beat.key}</span></td>
@@ -147,9 +149,27 @@ const BeatRow = React.memo(function BeatRow({ beat, genreNames, tagNames, isDele
     );
 });
 
-export default function BeatTable({ beats, genres, tags, isLoading, deletingId, togglingId, player, onEdit, onDeleteRequest, onToggleAvailability }: BeatTableProps) {
+export default function BeatTable({ beats, genres, tags, isLoading, deletingId, togglingId, searchQuery, player, onEdit, onDeleteRequest, onToggleAvailability }: BeatTableProps) {
     const genreNames = useMemo(() => new Map(genres.map((genre) => [genre._id, genre.name])), [genres]);
     const tagNames = useMemo(() => new Map(tags.map((tag) => [tag._id, tag.name])), [tags]);
+
+    // every whitespace-separated token must match somewhere in the row
+    // (so "afropop 140" finds afropop beats at 140 BPM)
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const filteredBeats = useMemo(() => {
+        if (!normalizedQuery) return beats;
+        const tokens = normalizedQuery.split(/\s+/);
+        return beats.filter((beat) => {
+            const haystack = [
+                beat.name,
+                String(beat.bpm),
+                beat.key,
+                ...(beat.genre ?? []).map((id) => genreNames.get(id) || ""),
+                ...(beat.tags ?? []).map((id) => tagNames.get(id) || ""),
+            ].join(" ").toLowerCase();
+            return tokens.every((token) => haystack.includes(token));
+        });
+    }, [beats, normalizedQuery, genreNames, tagNames]);
 
     const { activeId, isPlaying, isLoading: isAudioLoading, toggle, getAudio } = player;
     const onTogglePlay = useCallback((beat: IBeatRow) => {
@@ -176,8 +196,8 @@ export default function BeatTable({ beats, genres, tags, isLoading, deletingId, 
             <tbody className="overflow-hidden">
                 {isLoading ? (
                     Array.from({ length: 6 }).map((_, key) => <BeatSkeletonRow key={key} />)
-                ) : beats.length > 0 ? (
-                    beats.map((beat) => (
+                ) : filteredBeats.length > 0 ? (
+                    filteredBeats.map((beat) => (
                         <BeatRow
                             key={beat._id}
                             beat={beat}
@@ -195,6 +215,16 @@ export default function BeatTable({ beats, genres, tags, isLoading, deletingId, 
                             onToggleAvailability={onToggleAvailability}
                         />
                     ))
+                ) : beats.length > 0 ? (
+                    <tr>
+                        <td colSpan={COLS + 1}>
+                            <div className="py-14 border-b flex flex-col items-center gap-2 text-center text-[#777]">
+                                <RiSearchLine size={28} className="text-[#bbb]" />
+                                <p className="font-display">No beats match &ldquo;{searchQuery.trim()}&rdquo;</p>
+                                <p className="text-xs">Try a different name, genre, tag, key, or BPM.</p>
+                            </div>
+                        </td>
+                    </tr>
                 ) : (
                     <tr>
                         <td colSpan={COLS + 1}>

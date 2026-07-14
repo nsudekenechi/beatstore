@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 
 export default function Header() {
   const pathname = usePathname();
-  
+
   const links = [
     {
       Icon: VscHome,
@@ -52,21 +52,26 @@ export default function Header() {
               </li>
               <ul className="grid gap-7 bg-white p-4 shadow rounded-full">
                 {links.map(
-                  (link, index) =>
-                    !["logout"].includes(link.text) && (
+                  (link, index) => {
+                    const segments = pathname.split("/").filter(Boolean); // e.g. ["admin","dashboard","users"]
+                    const isActive = link.text === "home"
+                      ? segments[segments.length - 1] === "dashboard"
+                      : segments[segments.length - 1] === link.text;
+                    return !["logout"].includes(link.text) && (
                       <li key={index}>
                         <Link
                           href={`/admin/dashboard/${link.text == "home" ? "/" : link.text}`}
-                          className={`${pathname.includes(link.text === "home" ? "" : link.text ) ? "text-accent" : "text-[#c0c0c0]"}`}
-                          // className={({ isActive }) =>
-                          //   `${isActive ? " text-accent" : "text-[#c0c0c0]"}`
-                          // }
-                          // end={link.text == "home" ? true : false}
+                          className={`${isActive ? "text-accent" : "text-[#c0c0c0]"}`}
+                        // className={({ isActive }) =>
+                        //   `${isActive ? " text-accent" : "text-[#c0c0c0]"}`
+                        // }
+                        // end={link.text == "home" ? true : false}
                         >
                           <link.Icon size={16} />
                         </Link>
                       </li>
                     )
+                  }
                 )}
               </ul>
               {/* Bottom Nav */}
@@ -96,14 +101,14 @@ export default function Header() {
                   <li key={index}>
                     <Link
                       href={link.text == "home" ? "/" : link.text}
-                      // className={({ isActive }) =>
-                      //   `${
-                      //     isActive
-                      //       ? " bg-accent text-white rounded-full "
-                      //       : "text-[#c0c0c0]"
-                      //   } flex items-center justify-center w-8 h-8 duration-500 hover:translate-y-0.5`
-                      // }
-                      // end={link.text == "home" ? true : false}
+                    // className={({ isActive }) =>
+                    //   `${
+                    //     isActive
+                    //       ? " bg-accent text-white rounded-full "
+                    //       : "text-[#c0c0c0]"
+                    //   } flex items-center justify-center w-8 h-8 duration-500 hover:translate-y-0.5`
+                    // }
+                    // end={link.text == "home" ? true : false}
                     >
                       <link.Icon size={20} />
                     </Link>

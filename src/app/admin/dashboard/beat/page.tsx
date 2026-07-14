@@ -1,5 +1,6 @@
 "use client";
 import  { useCallback, useEffect, useState } from "react";
+import { RiSearchLine, RiCloseLine } from "react-icons/ri";
 import axios from "axios";
 import { toast } from "sonner";
 import { getToken } from "@/lib/util";
@@ -18,6 +19,8 @@ export default function Beat() {
     const [deleteTarget, setDeleteTarget] = useState<IBeatRow | null>(null);
     const [selectedDeleteBeat, setSelectedDeleteBeat] = useState<string | null>(null);
     const [togglingBeat, setTogglingBeat] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchFocused, setSearchFocused] = useState(false);
     const [isLoading, setIsLoading] = useState({
         get: false,
         post: false,
@@ -152,6 +155,31 @@ export default function Beat() {
                 </span>
             </div>
 
+            <div className="mb-6 relative w-full md:w-80 font-display">
+                <RiSearchLine className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" size={14} />
+                <input
+                    type="text"
+                    role="searchbox"
+                    aria-label="Search beats"
+                    placeholder="Search by name, genre, tag, key or BPM..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full border duration-300 ${searchFocused ? "border-accent" : "border-[#999]"} rounded-full pl-10 pr-9 py-2.5 text-xs outline-none`}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                />
+                {searchQuery && (
+                    <button
+                        type="button"
+                        aria-label="Clear search"
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999] hover:text-primary p-1 rounded-full hover:bg-black/5 duration-200 cursor-pointer"
+                    >
+                        <RiCloseLine size={14} />
+                    </button>
+                )}
+            </div>
+
             <BeatTable
                 beats={data}
                 genres={genres}
@@ -159,6 +187,7 @@ export default function Beat() {
                 isLoading={isLoading.get}
                 deletingId={selectedDeleteBeat}
                 togglingId={togglingBeat}
+                searchQuery={searchQuery}
                 player={player}
                 onEdit={handleEditRequest}
                 onDeleteRequest={handleDeleteRequest}
